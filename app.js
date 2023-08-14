@@ -4,12 +4,16 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
+const images = require("./routes/images");
+
 const app = express();
 mongoose.connect(process.env.MONGODB_URI);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors(process.env.CORS_ORIGIN));
+
+app.use("/images", images);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
