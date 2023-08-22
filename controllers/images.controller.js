@@ -1,20 +1,18 @@
-const Image = require("../models/Image");
+require("dotenv").config();
+const { fetchImageUrlsFromS3 } = require("../services/imageService");
 
 exports.get = async function (req, res, next) {
-  const offset = parseInt(req.query.offset, 10) || 0;
-  const limit = parseInt(req.query.limit, 10) || 10;
-
   try {
-    const totalImagesCount = await Image.countDocuments();
-    const totalPages = Math.ceil(totalImagesCount / limit);
-    const images = await Image.find().skip(offset).limit(limit).lean();
+    const { initial } = req.query;
+    const imageURLs = await fetchImageUrlsFromS3(
+      process.env.AWS_S3_BUCKET_NAME,
+    );
 
-    res.status(200).json({
-      totalPages,
-      images,
-    });
+    if (initial) {
+      res.status(200).json(imageURLs);
+    }
   } catch (err) {
-    console.error("Error fetching images:", err);
     next(err);
+    console.error("Error retrieving images:", err);
   }
 };
