@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 
+const index = require("./routes/index");
 const images = require("./routes/images");
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cors(process.env.CORS_ORIGIN));
 
+app.use("/", index);
 app.use("/images", images);
 
 // catch 404 and forward to error handler
