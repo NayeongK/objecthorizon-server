@@ -1,4 +1,3 @@
-require("dotenv").config();
 const { getS3Client, getListObjectsCommand } = require("../utils/s3Utils");
 
 async function fetchImageUrlsFromS3(bucketName, prefix, delimiter) {
