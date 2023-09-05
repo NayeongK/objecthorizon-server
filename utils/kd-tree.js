@@ -55,5 +55,6 @@ function closestPoint(node, point, best = null) {
 
 module.exports = {
   buildKDTree,
+  distanceSquared,
   closestPoint,
 };
