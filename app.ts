@@ -3,9 +3,10 @@ const createError = require("http-errors");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+import { Request, Response, NextFunction } from "express";
 
-const index = require("./routes/index");
-const images = require("./routes/images");
+import index from "./routes/index";
+import images from "./routes/images";
 
 const app = express();
 mongoose.connect(process.env.MONGODB_URI);
@@ -18,12 +19,12 @@ app.use("/", index);
 app.use("/images", images);
 
 // catch 404 and forward to error handler
-app.use(function (req, res, next) {
+app.use(function (req: Request, res: Response, next: NextFunction) {
   next(createError(404));
 });
 
 // error handler
-app.use(function (err, req, res) {
+app.use(function (err: any, req: Request, res: Response) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
