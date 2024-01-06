@@ -33,7 +33,7 @@ server.on("listening", onListening);
  * Normalize a port into a number, string, or false.
  */
 
-function normalizePort(val) {
+function normalizePort(val: string): string | number | false {
   const port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -53,7 +53,7 @@ function normalizePort(val) {
  * Event listener for HTTP server "error" event.
  */
 
-function onError(error) {
+function onError(error: NodeJS.ErrnoException): void {
   if (error.syscall !== "listen") {
     throw error;
   }
