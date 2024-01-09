@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const imageSchema = new mongoose.Schema({
   url: { type: String, required: true, unique: true },
@@ -10,4 +10,4 @@ const imageSchema = new mongoose.Schema({
   colorGroup: { type: Number, required: true },
 });
 
-module.exports = mongoose.model("Image", imageSchema);
+export default mongoose.model("Image", imageSchema);
