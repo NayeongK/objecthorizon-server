@@ -1,32 +1,53 @@
-const Image = require("../models/Image");
-const { fetchImageUrlsFromS3 } = require("../services/imageService");
-const { buildKDTree, closestPoint } = require("../utils/kd-tree");
+import Image from "../models/Image";
+import { fetchImageUrlsFromS3 } from "../services/imageService.js";
+import { buildKDTree, closestPoint } from "../utils/kd-tree.js";
+import { Request, Response, NextFunction } from "express";
 
-exports.get = async function (req, res, next) {
+export async function get(req: Request, res: Response, next: NextFunction) {
   try {
     const images = await Image.find({});
-    const points = images.map(img => [
-      img.rgbColor.r,
-      img.rgbColor.g,
-      img.rgbColor.b,
-    ]);
-    const tree = buildKDTree(points);
-    const { initial } = req.query;
-    const imageURLs = await fetchImageUrlsFromS3(
-      process.env.AWS_S3_BUCKET_NAME,
-    );
+    const points = images.map(img => {
+      if (!img.rgbColor) {
+        return [0, 0, 0];
+      }
 
+      return [img.rgbColor.r, img.rgbColor.g, img.rgbColor.b];
+    });
+    const tree = buildKDTree(points);
+
+    const initial = req.query.initial as string;
     if (initial) {
+      const bucketName = process.env.AWS_S3_BUCKET_NAME;
+      if (!bucketName) {
+        console.error(
+          "AWS S3 bucket name is not defined in environment variables.",
+        );
+        return;
+      }
+
+      const imageURLs = await fetchImageUrlsFromS3(bucketName);
+      if (!imageURLs) {
+        return res.status(404).json({ message: "Image URLs not found" });
+      }
       res.status(200).json(imageURLs.slice(0, 1));
       return;
     }
 
-    const { color: colorStr } = req.query;
+    const colorStr = req.query.color as string;
+    if (!colorStr) {
+      return res
+        .status(400)
+        .json({ message: "Color query parameter is required" });
+    }
     const color = colorStr.split(",").map(Number);
 
     const closestImageColor = closestPoint(tree, color);
+    if (!closestImageColor) {
+      return res.status(404).json({ message: "No closest image color found" });
+    }
     const closestImage = images.find(
       img =>
+        img.rgbColor &&
         img.rgbColor.r === closestImageColor[0] &&
         img.rgbColor.g === closestImageColor[1] &&
         img.rgbColor.b === closestImageColor[2],
@@ -41,9 +62,9 @@ exports.get = async function (req, res, next) {
     next(err);
     console.error(err);
   }
-};
+}
 
-exports.post = async function (req, res, next) {
+export async function post(req: Request, res: Response, next: NextFunction) {
   try {
     const { initial } = req.query;
     if (initial) {
@@ -71,4 +92,4 @@ exports.post = async function (req, res, next) {
     next(err);
     console.error(err);
   }
-};
+}
